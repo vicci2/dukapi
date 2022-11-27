@@ -63,42 +63,42 @@ def stock(payload:AddStock,db:Session = Depends(getDb)):
     server_default=func.now()
     now=server_default
     bP=payload.b_p * payload.quantity
-    res:AddStock=Stock(product_name=payload.product_name,quantity=payload.quantity,date=now,b_p=bP)      
+    res:AddStock=Stock(product_name=payload.product_name,desc=payload.desc,quantity=payload.quantity,date=now,b_p=bP)      
     db.add(res)
     db.commit()
     return {"Message":f"Product {payload.product_name} is now in stock"}
 
-@stock_router.put("/",
-    tags=["STOCK"],
-    response_model=Dict[str,str],
-    summary="Change name of a stocked item",
-    status_code=200
-)
-def editstock(itemID:int,payload:EditStock,db:Session = Depends(getDb)):
+# @stock_router.put("/",
+#     tags=["STOCK"],
+#     response_model=Dict[str,str],
+#     summary="Change name of a stocked item",
+#     status_code=200
+# )
+# def editstock(itemID:int,payload:EditStock,db:Session = Depends(getDb)):
     # querying the database  
-    item= db.query(Stock).filter(Stock.id==itemID).first()
-    if not item:
-        raise HTTPException(status_code=404,detail=f"Item {itemID}does not exist") 
-    elif payload.product_name!=item.product_name:
-        raise HTTPException(status_code=400,detail=f"Invalid product name")
-    item.product_name=payload.new_name
-    db.merge(item)
-    db.commit()
-    return {"Message":f"New product name:{payload.new_name}"}
+    # item= db.query(Stock).filter(Stock.id==itemID).first()
+    # if not item:
+    #     raise HTTPException(status_code=404,detail=f"Item {itemID}does not exist") 
+    # elif payload.product_name!=item.product_name:
+    #     raise HTTPException(status_code=400,detail=f"Invalid product name")
+    # item.product_name=payload.new_name
+    # db.merge(item)
+    # db.commit()
+    # return {"Message":f"New product name:{payload.new_name}"}
 
-@stock_router.put("/{name}",
+@stock_router.put("/",
     tags=["STOCK"],
     response_model=Dict[str,str],
     summary="Increase stocked product quantity",
     status_code=200
 )
-def stockUp(name:str,payload:StockUp,db:Session = Depends(getDb)):
+def stockUp(payload:StockUp,db:Session = Depends(getDb)):
     # querying the database  
-    item=db.query(Stock).filter(Stock.product_name == name).first()
+    item=db.query(Stock).filter(Stock.product_name == payload.name).first()
     if not item :
         raise HTTPException(status_code=404,detail=f"Sorry, product doesn't exist")    
     if item.id != payload.id:
-        raise HTTPException(status_code=400,detail=f"Sorry product {name},has not been availed")        
+        raise HTTPException(status_code=400,detail=f"Sorry product {payload.name},has not been availed")        
     item.quantity=item.quantity + payload.quantity
     db.merge(item)
     db.commit()
@@ -139,7 +139,9 @@ def avail(payload:Avail,db:Session = Depends(getDb)):
         raise HTTPException(status_code=403,detail=f"Sorry  can't avail this much of {item.product_name}")    
     server_default=func.now()
     now=server_default
-    res:Product=Products(name=item.product_name,quantity=payload.quantity,date=now,b_p=item.b_p,s_p=payload.selling_price,serial_no=payload.serial_no)          
+    bp=(item.b_p/item.quantity)*payload.quantity
+    # sp=payload.selling_price
+    res:Product=Products(name=item.product_name,quantity=payload.quantity,date=now,b_p=bp,s_p=payload.selling_price,serial_no=payload.serial_no)          
     item.quantity=item.quantity - payload.quantity
     db.add(res)
     db.merge(item)

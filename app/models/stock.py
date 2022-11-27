@@ -10,6 +10,7 @@ class Stock(Base):
     # Column defination:
     id=Column(Integer,primary_key=True,index=True)
     product_name=Column(String,nullable=False,unique=True)
+    desc=Column(String,nullable=False)
     quantity=Column(NUMERIC,nullable=False)
-    b_p=Column(String,nullable=False)
+    b_p=Column(NUMERIC,nullable=False)
     date=Column(DateTime(timezone=False),server_default=func.now())

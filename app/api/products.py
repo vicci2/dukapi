@@ -22,6 +22,7 @@ def getDb() -> Generator:
         db.close
 
 products_router=APIRouter()
+products_router2=APIRouter()
 
 @products_router.get("/",
     tags=["PRODUCTS"],
@@ -90,22 +91,24 @@ def editproduct(payload:EditProduct,db:Session = Depends(getDb)):
     db.commit()
     return {"Message":f"New selling Price:{payload.sp}"}
 
-@products_router.post("/{itemID}",
-    tags=["PRODUCTS"],
+@products_router2.post("/",
+    tags=["PRODUCTS2"],
     # response_model=MakeSale,
-    summary="Sale an item",
+    summary="Sell an item",
     status_code=200
 )
-def makeSale(itemID:int,payload:MakeSale,db:Session = Depends(getDb)):
+def makeSale(payload:MakeSale,db:Session = Depends(getDb)):
     # querying the database  
-    item=db.query(Products).filter(Products.id == itemID).first()       
+    item=db.query(Products).filter(Products.id == payload.id).first()       
     if not item :
         raise HTTPException(status_code=404,detail=f"Sorry, product doesn't exist")           
     if item.quantity < payload.quantity or payload.quantity <0 or payload.quantity==0 :
-        raise HTTPException(status_code=400,detail=f"Sorry, can't sale this much of {payload.name}")           
+        raise HTTPException(status_code=400,detail=f"Sorry, can't sale this much of {payload.name}")         
+    if item.name!=payload.name :
+        raise HTTPException(status_code=404,detail=f"Sorry, product doesn't exist")            
     item.quantity =item.quantity - payload.quantity
     prf=int(item.s_p - item.b_p)
-    sale:MakeSale=Sales(product_id=itemID,b_p=item.b_p,s_p=item.s_p,quantity=payload.quantity,profit=prf)
+    sale:MakeSale=Sales(product_id=payload.id,name=item.name,b_p=item.b_p,s_p=item.s_p,quantity=payload.quantity,profit=prf)
     db.add(sale)
     db.merge(item)
     db.commit()

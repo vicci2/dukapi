@@ -7,6 +7,7 @@ from datetime import datetime
 # stock schema
 class StockBase(BaseModel):
     product_name:str
+    desc:str
     quantity:int
     b_p:int    
 
@@ -24,6 +25,7 @@ class EditStock(BaseModel):
     new_name:Optional[str]
 
 class StockUp(BaseModel):
+    name:str
     id:int
     quantity:int
 
@@ -39,13 +41,15 @@ class SalesBase(BaseModel):
     quantity:int    
 
 class MakeSale(SalesBase):
-    pass
+    id:int    
 
 class Salesinfo(SalesBase):    
     class Config:
         orm_mode=True
 
-# class ViewSale(BaseModel)
+class ViewSales(BaseModel):
+    id:int
+    name:str
 
 # these classes use the relationships established
 class SaleInDb(SalesBase):

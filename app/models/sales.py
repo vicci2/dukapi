@@ -1,6 +1,6 @@
 # This file is used to scalulpt the Sales Model/Table in the system Database:
 
-from sqlalchemy import Column,Integer,DateTime,NUMERIC,func,ForeignKey
+from sqlalchemy import Column,Integer,String,DateTime,NUMERIC,func,ForeignKey
 from sqlalchemy.orm import relationship
 
 # We need to make sure that this model also meets our set specs in the db.base file Base class..... si:
@@ -13,6 +13,7 @@ class Sales(Base):
     # Column defination:
     id=Column(Integer,primary_key=True,index=True)
     product_id=Column(Integer,ForeignKey("products.id"))
+    name=Column(String,nullable=False)
     quantity=Column(NUMERIC,nullable=False)
     b_p=Column(NUMERIC,nullable=False)
     s_p=Column(NUMERIC,nullable=False)   

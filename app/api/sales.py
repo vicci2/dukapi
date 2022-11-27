@@ -5,7 +5,7 @@ from typing import List, Dict,Generator
 from app.db.session import SessionLocal
 from sqlalchemy.orm import Session
 # Attaching schemas that interact with the sales Model
-from app.schema import MakeSale
+from app.schema import *
 # Attaching target Model:
 from app.models.sales import Sales
 from app.models.products import Products
@@ -21,6 +21,7 @@ def getDb() -> Generator:
         db.close
 
 sales_router=APIRouter()
+sales_router2=APIRouter()
 
 @sales_router.get("/",
     tags=["SALES"],
@@ -32,27 +33,17 @@ def sales(db:Session = Depends(getDb)):
     # querying the database    
     return db.query(Sales).all()
 
-@sales_router.get("/{saleID}",
-    tags=["SALES"],
+@sales_router2.get("/",
+    tags=["SALES2"],
     # response_model=List[Sale],
-    summary="Get a particular sale item",
+    summary="Get sales of a particular item",
     status_code=200
 )
-def sales(itemID:int,db:Session = Depends(getDb)):
+def sales(payload:ViewSales,db:Session = Depends(getDb)):
     # querying the database  
-    sale=db.query(Sales).filter(Sales.id==itemID).first()
-    if not sale:
-        raise HTTPException(status_code=404,detail=f"Sorry, no such sale")
-    return sale
-
-@sales_router.get("/{productID}",
-    tags=["SALES"],
-    summary="View all the salesof an item",
-    status_code=200
-)
-def viewsales(productID:int,db:Session = Depends(getDb)):
-    # querying the database  
-    sales=db.query(Sales).filter(Sales.product_id==productID).first()    
-    if not sales:
-        raise HTTPException(status_code=400,detail="Invalid product ID!")
-    return sales
+    # sale=db.query(Sales).filter(Sales.id==payload.id).first()
+    # if not sale:
+    #     raise HTTPException(status_code=404,detail=f"Sorry, no such sale")
+    # else:
+    #     # view=
+        return db.query(Sales).filter(Sales.id==payload.id).all()
